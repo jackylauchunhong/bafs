@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE BAFS 人生理財大富翁</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Net Worth & Portfolio Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti for Game Completion -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bafs: {
+                            blue: '#1e3a8a',
+                            gold: '#d97706',
+                            green: '#059669',
+                            red: '#dc2626',
+                            purple: '#7c3aed',
+                            dark: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+        }
+        .career-card-input:checked + .career-card-content,
+        .spouse-card-input:checked + .spouse-card-content,
+        .baby-gender-input:checked + .baby-gender-content {
+            border-color: #1e3a8a;
+            background-color: #eff6ff;
+            box-shadow: 0 4px 14px rgba(30, 58, 138, 0.18);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 text-white sticky top-0 z-40 shadow-lg border-b border-blue-900">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 text-bafs-blue font-black px-3 py-1 rounded-lg text-lg shadow">
+                    F5企會財
+                </div>
+                <div>
+                    <h1 class="font-black text-base md:text-lg tracking-wide leading-tight">個人理財大富翁</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openLeaderboardModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>龍虎榜</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <div id="setup-screen" class="max-w-5xl mx-auto">
+            <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200">
+                
+                <div class="text-center mb-6">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full border border-amber-300">🎓 HKDSE BAFS 實戰</span>
+                    <h2 class="text-2xl md:text-3xl font-black text-slate-900 mt-2">個人理財大富翁 - 角色設定</h2>
+                    <p class="text-xs md:text-sm text-slate-600 mt-1">請設定角色姓名、性別並選擇職業背景，開啟你的理財人生：</p>
+                </div>
+
+                <form onsubmit="startGame(event)" class="space-y-6">
+                    <!-- Student Name & Gender Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                                <i class="fa-solid fa-user-pen text-bafs-blue mr-1"></i>學生姓名：
+                            </label>
+                            <input type="text" id="player-name" required placeholder="例如：劉俊康" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-bafs-blue focus:border-bafs-blue text-sm outline-none transition bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                                <i class="fa-solid fa-venus-mars text-bafs-blue mr-1"></i>角色性別：
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="male" checked class="sr-only career-card-input">
+                                    <div class="career-card-content border border-slate-200 p-3 rounded-xl text-center hover:border-bafs-blue transition bg-white flex items-center justify-center gap-2">
+                                        <span class="text-xl">🙋‍♂️</span>
+                                        <span class="font-bold text-sm text-slate-800">男</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="gender" value="female" class="sr-only career-card-input">
+                                    <div class="career-card-content border border-slate-200 p-3 rounded-xl text-center hover:border-bafs-blue transition bg-white flex items-center justify-center gap-2">
+                                        <span class="text-xl">🙋‍♀️</span>
+                                        <span class="font-bold text-sm text-slate-800">女</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-briefcase text-bafs-blue mr-1"></i>選擇職業背景（各有特色與專屬優勢）：
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="career" value="mcd" class="sr-only career-card-input">
+                                <div class="career-card-content border border-slate-200 p-4 rounded-xl hover:border-bafs-blue transition bg-white h-full flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-3xl">🍟</span>
+                                        </div>
+                                        <div class="font-bold text-slate-900 text-base">M記員工</div>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+                                            💡 起跑零學債！可免三餐費用（生活開支降至 25%）。
+                                        </p>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-slate-100 text-xs space-y-0.5">
+                                        <div class="text-emerald-600 font-bold">月薪 $15,000</div>
+                                        <div class="text-emerald-700 font-semibold">貸款 $0 (無學債)</div>
+                                        <div class="text-slate-500">儲蓄 $25,000</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="career" value="yt" class="sr-only career-card-input">
+                                <div class="career-card-content border border-slate-200 p-4 rounded-xl hover:border-bafs-blue transition bg-white h-full flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-3xl">📹</span>
+                                        </div>
+                                        <div class="font-bold text-slate-900 text-base">Youtuber</div>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+                                            💡 初始現金儲蓄最多！享 $100,000 存款起步。
+                                        </p>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-slate-100 text-xs space-y-0.5">
+                                        <div class="text-amber-600 font-bold">月薪 $20,000 (浮動)</div>
+                                        <div class="text-slate-500">貸款 $20,000</div>
+                                        <div class="text-purple-700 font-semibold">儲蓄 $100,000</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="career" value="clerk" class="sr-only career-card-input" checked>
+                                <div class="career-card-content border border-slate-200 p-4 rounded-xl hover:border-bafs-blue transition bg-white h-full flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-3xl">📊</span>
+                                        </div>
+                                        <div class="font-bold text-slate-900 text-base">會計文員</div>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+                                            💡 答對DSE題目即可額外加薪$2,000。
+                                        </p>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-slate-100 text-xs space-y-0.5">
+                                        <div class="text-emerald-600 font-bold">月薪 $22,000</div>
+                                        <div class="text-slate-500">貸款 $30,000</div>
+                                        <div class="text-slate-500">儲蓄 $35,000</div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="career" value="teacher" class="sr-only career-card-input">
+                                <div class="career-card-content border border-slate-200 p-4 rounded-xl hover:border-bafs-blue transition bg-white h-full flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-3xl">👩‍🏫</span>
+                                        </div>
+                                        <div class="font-bold text-slate-900 text-base">李求恩教師</div>
+                                        <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+                                            💡 全場最高月薪！但帶著 $300,000 大學學債。
+                                        </p>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-slate-100 text-xs space-y-0.5">
+                                        <div class="text-amber-700 font-bold">月薪 $34,000</div>
+                                        <div class="text-rose-600 font-semibold">貸款 $300,000</div>
+                                        <div class="text-slate-500">儲蓄 $20,000</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-bafs-blue hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl shadow transition duration-200 flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-play"></i>
+                        <span>開啟理財人生挑戰</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="game-dashboard" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT COLUMN: Financial Status Ledger -->
+            <div class="lg:col-span-4 space-y-5">
+                
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span id="player-display-avatar" class="text-3xl">🙋‍♂️</span>
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <span id="player-display-name" class="font-black text-lg text-slate-900 block">--</span>
+                                    <span id="player-display-gender" class="text-xs px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-medium">男</span>
+                                </div>
+                                <span id="player-display-career" class="text-xs text-bafs-blue font-bold px-2 py-0.5 bg-blue-50 rounded border border-blue-200 inline-block mt-0.5">--</span>
+                            </div>
+                        </div>
+                        <span id="stage-badge" class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-bold rounded-lg border border-amber-300">
+                            階段 1: 20-25歲
+                        </span>
+                    </div>
+
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mb-3">
+                        <div id="stage-progress" class="bg-bafs-blue h-full w-1/9 transition-all duration-300"></div>
+                    </div>
+
+                    <div id="family-status-badge" class="hidden bg-pink-50 border border-pink-200 rounded-xl p-2.5 mb-3 text-xs text-pink-900 flex items-center justify-between">
+                        <span class="font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-baby text-pink-500"></i>
+                            <span id="family-status-text">子女家庭資訊</span>
+                        </span>
+                        <span id="family-status-detail" class="font-semibold text-pink-700">--</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[11px] text-slate-500 font-semibold block">目前月薪收入</span>
+                            <span id="display-salary" class="font-bold text-slate-800 text-sm">$0</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[11px] text-slate-500 font-semibold block">個人信貸評級</span>
+                            <span id="display-credit-rating" class="font-bold text-emerald-600 text-sm">A (極優)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-bafs-blue"></i>
+                            <span>動態財務狀況表</span>
+                        </h3>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="font-bold text-slate-700 border-b pb-1 text-xs">【資產】</div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>現金及銀行存款:</span>
+                            <span id="ledger-cash" class="font-semibold text-slate-800">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>強積金累算權益:</span>
+                            <span id="ledger-mpf" class="font-semibold text-blue-700">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>債券/定期存款:</span>
+                            <span id="ledger-bonds" class="font-semibold text-slate-800">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>股票:</span>
+                            <span id="ledger-stocks" class="font-semibold text-slate-800">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>物業估值:</span>
+                            <span id="ledger-property" class="font-semibold text-slate-800">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>二手車估值:</span>
+                            <span id="ledger-car" class="font-semibold text-slate-800">$0</span>
+                        </div>
+
+                        <div class="font-bold text-slate-700 border-b pt-2 pb-1 text-xs">【負債】</div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>信用卡欠債:</span>
+                            <span id="ledger-credit-debt" class="font-semibold text-rose-600">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>分期/私人貸款:</span>
+                            <span id="ledger-loan" class="font-semibold text-rose-600">$0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>房屋按揭貸款:</span>
+                            <span id="ledger-mortgage" class="font-semibold text-rose-600">$0</span>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mt-3 flex justify-between items-center">
+                            <span class="font-bold text-slate-800">個人淨資產:</span>
+                            <span id="ledger-networth" class="font-black text-bafs-blue text-base">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Scenario & Quiz Interactive Zone -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <div id="scene-card" class="glass-panel p-6 rounded-2xl shadow-md border border-slate-200 relative">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-amber-600 tracking-wider uppercase" id="turn-subhead">階段 1 / 9</span>
+                            </div>
+                            <h2 id="scene-title" class="text-xl md:text-2xl font-black text-slate-900 mt-0.5">載入中...</h2>
+                        </div>
+                        <div id="round-indicator" class="w-10 h-10 rounded-full bg-bafs-blue text-white flex items-center justify-center font-bold text-sm shadow">
+                            1/9
+                        </div>
+                    </div>
+
+                    <div id="scene-description" class="text-sm text-slate-700 leading-relaxed mb-5">
+                        --
+                    </div>
+
+                    <div id="cashflow-summary" class="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-5">
+                        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">本階段基礎現金流估算</h4>
+                            <span id="cf-formula-note" class="text-[11px] bg-blue-100 text-bafs-blue px-2.5 py-1 rounded-md font-bold border border-blue-200">--</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-slate-500 block text-[11px] font-medium">本階段薪金總收入:</span>
+                                <span id="cf-income" class="font-bold text-emerald-600 block text-sm my-0.5">$0</span>
+                                <span id="cf-income-sub" class="text-[10px] text-slate-500 block bg-emerald-50 px-1.5 py-0.5 rounded w-fit">$0/月</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-slate-500 block text-[11px] font-medium">強積金 (僱員 5%):</span>
+                                <span id="cf-mpf" class="font-bold text-blue-600 block text-sm my-0.5">$0</span>
+                                <span class="text-[10px] text-slate-500 block bg-blue-50 px-1.5 py-0.5 rounded w-fit">總收入 x 5%</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-slate-500 block text-[11px] font-medium">基本生活開支:</span>
+                                <span id="cf-living" class="font-bold text-rose-600 block text-sm my-0.5">$0</span>
+                                <span id="cf-living-note" class="text-[10px] text-slate-500 block bg-rose-50 px-1.5 py-0.5 rounded w-fit">總收入 x 45%</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-slate-500 block text-[11px] font-medium">估算負債利息負擔:</span>
+                                <span id="cf-debt" class="font-bold text-rose-600 block text-sm my-0.5">$0</span>
+                                <span class="text-[10px] text-slate-500 block bg-slate-100 px-1.5 py-0.5 rounded w-fit">根據負債計算</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="decision-box" class="space-y-3 mb-5">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-code-fork text-amber-600 mr-1"></i>請選擇你的理財決策：
+                        </label>
+                    </div>
+
+                    <div id="exam-challenge-box" class="bg-amber-50/70 border border-amber-200 p-4 rounded-xl">
+                        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                            <div class="flex items-center gap-1.5 text-slate-800 font-bold text-xs">
+                                <i class="fa-solid fa-file-pen text-bafs-blue"></i>
+                                <span id="quiz-career-tag">DSE題目</span>
+                            </div>
+                            <span id="quiz-reward-badge" class="text-[11px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">
+                                💡 答對獎勵：+$5,000 現金
+                            </span>
+                        </div>
+                        <p id="exam-question" class="text-xs text-slate-800 font-semibold mb-3 leading-relaxed">--</p>
+                        <div id="exam-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex justify-end">
+                        <button id="next-turn-btn" onclick="processTurnAction()" class="w-full sm:w-auto px-6 py-3 bg-bafs-blue hover:bg-blue-900 text-white font-bold text-xs sm:text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <span>提交決策與答案</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- GRAND FINALE REPORT SCREEN -->
+        <div id="report-screen" class="hidden glass-panel p-6 md:p-8 rounded-2xl shadow-2xl max-w-4xl mx-auto my-6 border border-amber-300">
+            <div class="text-center mb-6">
+                <span class="px-3.5 py-1.5 bg-amber-500 text-slate-900 font-black text-xs rounded-full uppercase tracking-wider shadow">
+                    🎉 理財人生終點站 (60歲退休)
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mt-3">理財戰略總報告</h2>
+                <p class="text-xs md:text-sm text-slate-600 mt-1">恭喜完成了 9 大人生階段理財考驗！你的最終成績已登錄至全校排行榜！</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-200 text-center shadow-sm">
+                    <span class="text-xs text-amber-800 font-bold block">🏆 最終總淨資產</span>
+                    <span id="report-networth" class="text-2xl md:text-3xl font-black text-bafs-blue my-1 block">$0</span>
+                    <span id="report-rank-badge" class="text-[11px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-bold">排行榜結算中</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <span class="text-xs text-slate-500 font-semibold block">🎓 掌握考題數 (不含補考)</span>
+                    <span id="report-mastered-count" class="text-2xl md:text-3xl font-black text-emerald-600 my-1 block">0 / 9</span>
+                    <span id="report-retry-bonus-tag" class="text-[11px] text-emerald-700 font-medium">重溫補考總加分：+$0</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                    <span class="text-xs text-slate-500 font-semibold block">💳 最終個人信貸評級</span>
+                    <span id="report-credit-rating" class="text-2xl md:text-3xl font-black text-amber-600 my-1 block">--</span>
+                    <span class="text-[11px] text-slate-500">反映整體個人財務管理健康度</span>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-blue-50/80 p-4 rounded-xl border border-blue-200 shadow-sm">
+                    <h4 class="font-bold text-bafs-blue text-sm mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-award"></i>
+                        <span>理財總評語：</span>
+                    </h4>
+                    <p id="report-eval-text" class="text-xs text-slate-700 leading-relaxed">
+                        --
+                    </p>
+                </div>
+
+                <div class="border border-slate-200 p-4 rounded-xl bg-white shadow-sm">
+                    <h5 class="font-bold text-xs text-slate-800 mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-chart-pie text-bafs-blue"></i>
+                        <span>退休資產組合分佈</span>
+                    </h5>
+                    <canvas id="asset-chart" class="max-h-56"></canvas>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+                <button onclick="openLeaderboardModal()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>查看最終總淨資產排行榜</span>
+                </button>
+                <button onclick="location.reload()" class="px-6 py-3 bg-bafs-blue hover:bg-blue-900 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>再戰一次！重新挑戰人生</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800">
+        <p>李求恩紀念中學 企業、會計與財務概論科 中五級 個人理財</p>
+    </footer>
+
+    <!-- LEADERBOARD MODAL (排行榜) -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-4xl w-full rounded-2xl p-6 shadow-2xl border border-amber-400 space-y-4 my-auto bg-white">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🏆</span>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-900">最終總淨資產排行榜</h3>
+                        <p class="text-xs text-slate-500">誰是理財大富翁終極高手？</p>
+                    </div>
+                </div>
+                <button onclick="closeLeaderboardModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto max-h-[60vh] overflow-y-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <th class="py-2.5 px-3 text-center">排名</th>
+                            <th class="py-2.5 px-3">學生姓名</th>
+                            <th class="py-2.5 px-3">遊玩年份</th>
+                            <th class="py-2.5 px-3">職業背景</th>
+                            <th class="py-2.5 px-3 text-right">最終總淨資產</th>
+                            <th class="py-2.5 px-3 text-center">掌握DSE題數</th>
+                            <th class="py-2.5 px-3 text-center">管理操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody" class="divide-y divide-slate-100">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pt-3 border-t flex justify-between items-center text-xs">
+                <button onclick="clearLeaderboardData()" class="text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>重置排行榜紀錄</span>
+                </button>
+                <button onclick="closeLeaderboardModal()" class="px-5 py-2 bg-bafs-blue text-white rounded-xl font-bold shadow hover:bg-blue-900 transition">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DSE WRONG QUESTIONS REVIEW / MAKEUP EXAM MODAL (錯題重補考) -->
+    <div id="wrong-questions-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-xl w-full rounded-2xl p-6 shadow-2xl border border-indigo-400 space-y-4 my-auto bg-white">
+            <div class="text-center border-b pb-3">
+                <span class="px-3 py-1 bg-indigo-100 text-indigo-800 font-black text-xs rounded-full border border-indigo-300">
+                    ✏️ DSE 錯題補考救贖機會
+                </span>
+                <h3 class="font-black text-2xl text-slate-900 mt-2">
+                    重新挑戰曾經答錯的 DSE 題目！
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    在邁向終點前，這是你終極清空錯題的良機！每答對一道重溫題目，可獲獎學金 <strong class="text-emerald-600">+$20,000</strong>！
+                </p>
+            </div>
+
+            <div id="retry-progress-tag" class="text-xs font-bold text-indigo-600 text-center bg-indigo-50 py-1.5 rounded-lg border border-indigo-100">
+                重溫題目 <span id="retry-curr-num">1</span> / <span id="retry-total-num">1</span>
+            </div>
+
+            <div class="bg-amber-50/80 p-4 rounded-xl border border-amber-200">
+                <div class="text-xs font-bold text-amber-900 mb-1" id="retry-question-stage">
+                    階段 X 錯題
+                </div>
+                <p id="retry-question-text" class="text-xs font-semibold text-slate-800 mb-3 leading-relaxed">
+                    --
+                </p>
+                <div id="retry-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                </div>
+            </div>
+
+            <div id="retry-feedback-box" class="hidden p-3 rounded-xl border text-xs">
+                <div id="retry-feedback-title" class="font-bold mb-1"></div>
+                <div id="retry-feedback-desc" class="text-slate-700 leading-relaxed"></div>
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button id="retry-submit-btn" onclick="submitRetryAnswer()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow transition">
+                    提交重溫答案
+                </button>
+                <button id="retry-next-btn" onclick="nextRetryQuestion()" class="hidden w-full py-3 bg-bafs-blue hover:bg-blue-900 text-white font-bold text-xs sm:text-sm rounded-xl shadow transition">
+                    下一題 / 進入總報告
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mortgage Choice Modal -->
+    <div id="mortgage-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 shadow-2xl border border-amber-500/60 space-y-4 my-auto bg-slate-900 text-white">
+            <div class="text-center border-b border-slate-700 pb-3">
+                <span class="px-3 py-1 bg-rose-500/20 text-rose-400 font-black text-xs rounded-full border border-rose-500/40 uppercase tracking-widest">
+                    ⚠️ 銀行存款負數 ‧ 資產抵押警告
+                </span>
+                <h3 class="font-black text-xl text-amber-400 mt-2">
+                    資產強制抵押變現
+                </h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                    你的銀行存款目前為負數（赤字）！若堅持要到澳門賭場「孤注一擲」，必須先將你手上的所有資產作強制抵押變現以償還欠款，剩餘資金方可兌換為賭博籌碼！
+                </p>
+            </div>
+
+            <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 text-xs space-y-2">
+                <div class="flex justify-between items-center text-rose-400 font-bold border-b border-slate-700 pb-2">
+                    <span>目前銀行存款欠款 (赤字):</span>
+                    <span id="mortgage-deficit-val" class="text-sm">-$0</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                    <span>估算可抵押非現金資產總值:</span>
+                    <span id="mortgage-assets-val" class="font-semibold text-emerald-400">+$0</span>
+                </div>
+                <div class="flex justify-between items-center text-amber-300 font-black pt-2 border-t border-slate-700 text-sm">
+                    <span>抵押後預計賭場籌碼 (現金):</span>
+                    <span id="mortgage-remaining-val" class="text-base text-amber-400">$0</span>
+                </div>
+            </div>
+
+            <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-3 text-[11px] text-amber-200 leading-relaxed">
+                💡 <strong>理財提醒：</strong>「賭博深似海，抵押無回頭！」賭場內莊家勝率極高，資產一經抵押將可能付諸東流，陷入萬劫不復的破產困境。
+            </div>
+
+            <div class="pt-2 space-y-2.5">
+                <button onclick="confirmMortgageAndEnterCasino()" class="w-full py-3 bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-700 hover:to-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-contract"></i>
+                    <span>確認抵押資產並進入賭場</span>
+                </button>
+                <button onclick="retreatToSafeDeposit()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/50 hover:border-emerald-400 font-bold text-xs sm:text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>懸崖勒馬，不去澳門（改選安享晚年定存）</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marriage Choice Modal -->
+    <div id="marriage-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-2xl w-full rounded-2xl p-6 shadow-2xl border border-rose-300 space-y-4 my-auto bg-white">
+            <div class="text-center border-b pb-3">
+                <span class="px-3 py-1 bg-rose-100 text-rose-800 font-bold text-xs rounded-full border border-rose-300">
+                    ⚠️ 答錯 DSE 考題懲罰：婚姻大抉擇！
+                </span>
+                <h3 id="marriage-modal-title" class="font-black text-xl text-slate-900 mt-2">
+                    請選擇你的結婚對象
+                </h3>
+                <p id="marriage-modal-subtitle" class="text-xs text-slate-600 mt-1">
+                    由於答錯理財題目，你被逼踏入婚姻殿堂！請選擇你要結婚的對象，不同伴侶將帶來不同的禮金與家用負擔：
+                </p>
+            </div>
+
+            <div id="marriage-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto p-1">
+            </div>
+
+            <div class="pt-2">
+                <button onclick="confirmMarriageChoice()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-ring"></i>
+                    <span>確認結婚對象並接受財務懲罰</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Baby Choice Modal -->
+    <div id="baby-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 shadow-2xl border border-pink-300 space-y-5 my-auto bg-white">
+            <div class="text-center border-b pb-3">
+                <span class="px-3 py-1 bg-pink-100 text-pink-800 font-bold text-xs rounded-full border border-pink-300">
+                    👶 階段 5 答錯 DSE 考題懲罰：喜得貴子 / 千金！
+                </span>
+                <h3 class="font-black text-xl text-slate-900 mt-2 flex items-center justify-center gap-2">
+                    <span>迎接家庭新成員</span>
+                    <span class="text-2xl">🍼</span>
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    由於答錯理財題目，你喜得 BB！請決定 BB 性別並為 BB 起名：
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Gender Choice -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-baby text-pink-500 mr-1"></i>請選擇 BB 性別：
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="babyGender" value="boy" checked class="sr-only baby-gender-input">
+                            <div class="baby-gender-content border border-slate-200 p-3 rounded-xl text-center hover:border-bafs-blue transition bg-white flex flex-col items-center justify-center gap-1">
+                                <span class="text-3xl">👦</span>
+                                <span class="font-bold text-sm text-slate-800">BB仔 (男)</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="babyGender" value="girl" class="sr-only baby-gender-input">
+                            <div class="baby-gender-content border border-slate-200 p-3 rounded-xl text-center hover:border-bafs-blue transition bg-white flex flex-col items-center justify-center gap-1">
+                                <span class="text-3xl">👧</span>
+                                <span class="font-bold text-sm text-slate-800">BB女 (女)</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Baby Name Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        <i class="fa-solid fa-pen-nib text-pink-500 mr-1"></i>請輸入 BB 的名字：
+                    </label>
+                    <input type="text" id="baby-name-input" placeholder="例如：劉小明 / 劉欣欣" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm outline-none transition bg-white">
+                </div>
+
+                <!-- Expense Warning -->
+                <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-800 flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500 text-base mt-0.5"></i>
+                    <div>
+                        <span class="font-bold block">育兒財務負擔影響：</span>
+                        <span class="text-[11px] leading-relaxed block text-rose-700">每月養育小朋友成本增加 <strong class="text-rose-900">+$10,000</strong>（每個階段5年額外支出 -$600,000）！</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="confirmBabyChoice()" class="w-full py-3.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>確認迎接 BB 進入家庭</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Heart Disease Emergency Modal (階段7後突發事件) -->
+    <div id="heart-disease-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 shadow-2xl border border-rose-500 space-y-4 my-auto bg-white text-slate-900">
+            <div class="text-center border-b pb-3">
+                <span class="px-3 py-1 bg-rose-100 text-rose-800 font-bold text-xs rounded-full border border-rose-300 uppercase tracking-wider">
+                    🚨 階段 7 突發健康危機 🚨
+                </span>
+                <h3 class="font-black text-2xl text-rose-600 mt-2 flex items-center justify-center gap-2">
+                    <span>患上急性心臟病</span>
+                    <span class="text-2xl">🫀</span>
+                </h3>
+                <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                    你在 50-55 歲期間不幸確診急性心臟病，需要進行緊急心臟手術！醫療手術費用總計 <strong class="text-rose-600 font-bold">$1,000,000</strong>。
+                </p>
+            </div>
+
+            <div id="heart-disease-content" class="space-y-3">
+                <!-- Dynamic Content based on Insurance -->
+            </div>
+
+            <div class="pt-2">
+                <button onclick="confirmHeartDiseasePayment()" class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hospital-user"></i>
+                    <span>支付手術費用並繼續人生</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto bg-white">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <span id="fb-stage-tag" class="px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-bold rounded-lg border border-amber-300">
+                        階段 1 結算
+                    </span>
+                    <h3 class="font-black text-slate-900 text-base">階段決策與考點結算</h3>
+                </div>
+            </div>
+
+            <div id="fb-quiz-card" class="p-4 rounded-xl border">
+                <div class="flex items-center gap-2 font-bold text-sm mb-1" id="fb-quiz-status">
+                </div>
+                <p class="text-xs text-slate-700 mt-1 leading-relaxed" id="fb-quiz-explanation">--</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-gift text-amber-500"></i>
+                    <span>本階段決策與財務變動記錄</span>
+                </h4>
+                <ul id="fb-outcomes-list" class="text-xs space-y-1.5 text-slate-700">
+                </ul>
+            </div>
+
+            <div class="pt-2">
+                <button id="fb-next-btn" onclick="confirmNextStage()" class="w-full py-3.5 bg-bafs-blue hover:bg-blue-900 text-white font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <span id="fb-btn-text">進入下一階段</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Macau Casino Modal -->
+    <div id="casino-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 shadow-2xl border border-amber-500/50 space-y-4 text-center bg-slate-900 text-white relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="border-b border-slate-700 pb-3">
+                <span class="px-3 py-1 bg-amber-500/20 text-amber-400 font-black text-xs rounded-full border border-amber-500/40 uppercase tracking-widest">
+                    🎰 澳門豪華賭場 ‧ 孤注一擲
+                </span>
+                <h3 class="font-black text-xl text-amber-400 mt-2">包剪揼賭局 (賭注：全部現金儲蓄)</h3>
+            </div>
+
+            <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400 font-semibold block">目前攜帶所有儲蓄金額</span>
+                <span id="casino-cash-display" class="text-3xl font-black text-amber-400">$0</span>
+            </div>
+
+            <div id="casino-arena" class="py-2 space-y-3">
+                <p id="casino-status-text" class="text-xs text-slate-300 font-medium leading-relaxed">
+                    請選擇你的出招（勝出可令總儲蓄翻倍，平手重來）：
+                </p>
+                <div id="casino-hands-display" class="flex justify-center items-center gap-6 text-4xl my-2 min-h-[50px]">
+                    <div class="text-center">
+                        <span class="text-xs text-slate-400 block mb-1">玩家</span>
+                        <span id="player-hand-icon">❓</span>
+                    </div>
+                    <span class="text-xl font-bold text-slate-500">VS</span>
+                    <div class="text-center">
+                        <span class="text-xs text-slate-400 block mb-1">賭場莊家</span>
+                        <span id="dealer-hand-icon">❓</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rps-buttons" class="grid grid-cols-3 gap-3">
+                <button onclick="playRPS('rock')" class="p-3 bg-slate-800 hover:bg-amber-600 border border-slate-600 hover:border-amber-400 rounded-xl transition text-2xl font-bold flex flex-col items-center gap-1">
+                    <span>✊</span>
+                    <span class="text-xs font-bold text-white">石頭</span>
+                </button>
+                <button onclick="playRPS('scissors')" class="p-3 bg-slate-800 hover:bg-amber-600 border border-slate-600 hover:border-amber-400 rounded-xl transition text-2xl font-bold flex flex-col items-center gap-1">
+                    <span>✌️</span>
+                    <span class="text-xs font-bold text-white">剪刀</span>
+                </button>
+                <button onclick="playRPS('paper')" class="p-3 bg-slate-800 hover:bg-amber-600 border border-slate-600 hover:border-amber-400 rounded-xl transition text-2xl font-bold flex flex-col items-center gap-1">
+                    <span>✋</span>
+                    <span class="text-xs font-bold text-white">包</span>
+                </button>
+            </div>
+
+            <div id="casino-owner-warning" class="hidden bg-rose-950/90 border border-rose-500/60 p-3 rounded-xl text-left text-xs space-y-1">
+                <div class="font-bold text-rose-400 flex items-center gap-1">
+                    <i class="fa-solid fa-skull-crossbones"></i>
+                    <span>賭場東主惡狠狠地攔住去路：</span>
+                </div>
+                <p id="casino-warning-text" class="text-rose-200 leading-relaxed">
+                    「入得嚟澳門賭場，贏咗錢就想走？冇咁易！今日唔玩到輸光，休想踏出賭場半步！」
+                </p>
+            </div>
+
+            <div class="pt-2 flex flex-col gap-2">
+                <button id="casino-quit-btn" onclick="attemptQuitCasino()" class="w-full py-2.5 bg-slate-800 hover:bg-rose-900/80 text-slate-300 border border-slate-700 hover:border-rose-500 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-door-open"></i>
+                    <span>見好就收，嘗試離開賭場</span>
+                </button>
+                <button id="casino-finish-btn" onclick="closeCasinoModalAndContinue()" class="hidden w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow transition">
+                    <span>接受破產慘痛教訓，離開賭場</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME ENGINE -->
+    <script>
+        const ADMIN_PASSWORD = "60576252";
+
+        const state = {
+            playerName: '',
+            gender: 'male',
+            careerType: 'clerk',
+            careerTitle: '',
+            currentRound: 1,
+            salary: 0,
+            cash: 0,
+            mpf: 0,
+            bonds: 0,
+            stocksMain: 0,
+            stocksGEM: 0,
+            propertyValue: 0,
+            carValue: 0,
+            creditDebt: 0,
+            personalLoan: 0,
+            mortgageLoan: 0,
+            creditScore: 800,
+            hasInsurance: false,
+            stage3GuarantorTriggered: false,
+            extraMonthlyExpense: 0,
+            spouseInfo: null,
+            babyInfo: null,
+            totalQuizCount: 0,
+            quizCorrectCount: 0,
+            masteredTopics: [],
+            wrongQuestions: [],
+            retryBonusTotal: 0
+        };
+
+        let pendingQuizIsCorrect = false;
+        let pendingQuizData = null;
+        let pendingOutcomesLog = [];
+        let casinoLocked = false;
+        let casinoAttemptCount = 0;
+        let assetChartInstance = null;
+
+        // Retry / Wrong Questions State
+        let retryIndex = 0;
+
+        const careerDisplayNames = {
+            mcd: 'M記員工',
+            yt: 'Youtuber',
+            clerk: '會計文員',
+            teacher: '李求恩教師'
+        };
+
+        function getPromotionName(career, level) {
+            const titles = {
+                mcd: ['M記分店經理', 'M記區域總監'],
+                yt: ['十萬訂閱Youtuber', '百萬頻道合夥人'],
+                clerk: ['高級會計主任', '助理財務總監'],
+                teacher: ['高級教師', '學務主任']
+            };
+            return titles[career]?.[level - 1] || '高級主管';
+        }
+
+        const wifeOptions = [
+            {
+                id: 'wonyoung',
+                name: '張元英',
+                tag: '🌟 頂級 K-Pop 女神',
+                dowry: 200000,
+                monthlyExpense: 12000,
+                imgUrl: 'https://cdn.diodeo.jp/cdn/webzine/2024/05/06/20240506234550_6638ed1ea1464.jpeg',
+                desc: '娶老婆！要求高額禮金 $200,000，且每月生活家用 +$12,000。'
+            },
+            {
+                id: 'mrs_ho',
+                name: '何太',
+                tag: '💰 全城話題人物',
+                dowry: 100000,
+                monthlyExpense: 10000,
+                imgUrl: 'https://image.hkhl.hk/f/1024p0/0x0/100/none/3359cb69c2bdbbabfa14d7371c0a2a71/2024-08/A2_0_0.jpg',
+                desc: '娶老婆！要求 $100,000 禮金，並要求每月家用 +$10,000！'
+            },
+            {
+                id: 'ah_bing',
+                name: '薯茄阿冰',
+                tag: '🎬 網紅親民女神',
+                dowry: 80000,
+                monthlyExpense: 8000,
+                imgUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPgai0MOV6yoS2ZamLOxz3pfQ6IZQ6sGDcRt85QOs0Olrd8hccuzSG-A&s=10',
+                desc: '娶老婆！付 $80,000 禮金及每月 +$8,000 家用。'
+            },
+            {
+                id: 'crush_f',
+                name: '中學暗戀對象',
+                tag: '🏫 青澀回憶',
+                dowry: 50000,
+                monthlyExpense: 6000,
+                imgUrl: null,
+                desc: '娶老婆！重逢校園時代暗戀對象，親民禮金 $50,000 及每月 +$6,000 家用。'
+            }
+        ];
+
+        const husbandOptions = [
+            {
+                id: 'eunwoo',
+                name: '車銀優',
+                tag: '✨ 臉蛋天才男神',
+                dowry: 0,
+                monthlyExpense: 12000,
+                imgUrl: 'https://hips.hearstapps.com/hmg-prod/images/fotojet-2-1672132671.jpg?crop=0.500xw:1.00xh;0.500xw,0&resize=640:*',
+                desc: '嫁人！老公時尚開支高昂，每月需負擔家用 +$12,000。'
+            },
+            {
+                id: 'ian',
+                name: 'Ian (陳卓賢)',
+                tag: '🎵 唱作才子男神',
+                dowry: 0,
+                monthlyExpense: 10000,
+                imgUrl: 'https://api.harpersbazaar.com.hk/var/site/storage/images/_aliases/img_640_w/celebrity/ian-chan/11-cover/2583699-1-chi-HK/11-Cover.jpg',
+                desc: '嫁人！每月需補貼生活與音樂創作家用 +$10,000。'
+            },
+            {
+                id: 'eric_tsang',
+                name: '曾志偉',
+                tag: '📺 失業「獎門人」',
+                dowry: 0,
+                monthlyExpense: 8000,
+                imgUrl: 'https://q3.itc.cn/q_70/images03/20240822/a0d75772794e4d3493a482bb437b0743.jpeg',
+                desc: '嫁人（但未婚夫失業）！每月需支付家用 +$8,000！'
+            },
+            {
+                id: 'crush_m',
+                name: '中學暗戀對象',
+                tag: '🏫 青澀回憶',
+                dowry: 0,
+                monthlyExpense: 6000,
+                imgUrl: null,
+                desc: '嫁人（但未婚夫失業）！嫁給中學時代男神，每月家用只需 +$6,000。'
+            }
+        ];
+
+        const roundScenarioDefinitions = [
+            {
+                stageName: "階段 1: 20-25歲",
+                title: "買醫療保險？",
+                topicTag: "強積金與複利息概念",
+                rewardText: "🎰 買六合彩爆冷中三獎！獨得橫財 $17,000！",
+                desc: "剛步入職場，你面臨第一個理財決策：除了依法扣除 5% 強積金供款外，究竟是購買醫療保險以轉移急病風險，還是投入定期存款累積利息？",
+                tip: "強積金由僱主及僱員各供款 5%。複利息是指今期賺取的利息會成為下期本金的一部分，一併賺取利息，複息頻率越高，實際回報率越高。",
+                choices: [
+                    { title: "全方位保障", action: "buy_full_insurance", desc: "購買醫療保險，每年供款$5,000。" },
+                    { title: "定期存款", action: "keep_emergency_cash", desc: "不買醫療保險，每年作定期存款$5,000，年利率4%。" }
+                ]
+            },
+            {
+                stageName: "階段 2: 25-30歲",
+                title: "交卡數？",
+                topicTag: "信用卡與私人貸款利息比較",
+                rewardText: "🎉 答對獲職位晉升！(升職並加薪 +$4,000/月)",
+                desc: "你累積了 $30,000 信用卡欠款。信用卡年利率高達 35%，若只還最低還款額利息極高。面對這筆卡債，你打算如何處理？",
+                tip: "信用卡延遲還款利率極高（30%-40%）；而私人分期貸款有固定還款期與固定每月供款，利率較低，能幫助作較佳的還款預算。",
+                choices: [
+                    { title: "動用儲蓄一次過付清", action: "use_savings_pay_card", desc: "動用 $30,000 現金儲蓄一次過付清卡債，免受高息折磨，但流動存款會減少。" },
+                    { title: "申請私人分期貸款", action: "refinance_debt", desc: "申請低息私人分期貸款（年利率 6%）來替換卡債，固定按月分期供款，減輕利息負擔。" }
+                ]
+            },
+            {
+                stageName: "階段 3: 30-35歲",
+                title: "還錢定投資？",
+                topicTag: "擔保人法律責任與實質回報率",
+                rewardText: "🚗 答對考題獲贈一架實用二手車（估值 $35,000 資產）！",
+                desc: "【突發事件】在階段 2 結束後，你早年曾任擔保人的中學同學因投資失敗宣告破產逃跑！作為法律擔保人，你被迫承擔了他的 $50,000 私人貸款 (年利率 8%)。此時市場進入高息環境，銀行推出 5% 年利率定期存款。面對這筆 8% 高息私人貸款與 5% 定存，你打算如何處置？",
+                tip: "擔保人須依法承擔借款人的全部還款責任！當貸款利率 (8%) 高於存款回報率 (5%) 時，提早清還高息貸款能為你節省更多淨利息，效益高於儲蓄定存。",
+                choices: [
+                    { title: "優先清還擔保人 8% 私人貸款", action: "pay_off_loan_early", desc: "優先動用儲蓄提早清還 8% 私人貸款，節省高額利息負擔並保護信貸評級。" },
+                    { title: "投入 5% 高息定期存款", action: "invest_high_yield", desc: "將閒置資金投入 5% 高息定存賺取利息，但繼續承擔 8% 私人貸款利息成本。" }
+                ]
+            },
+            {
+                stageName: "階段 4: 35-40歲",
+                title: "買樓定租樓？",
+                topicTag: "房屋按揭與信用限額",
+                rewardText: "⚠️ 答錯懲罰：娶老婆 / 嫁人（但未婚夫失業）",
+                desc: "你面臨置業定居的抉擇。若選擇購買 $4,000,000 物業，需支付 20% 首期 ($800,000) 並承擔 30% 房屋貸款；若選擇租樓（每年付出租金 $150,000，即每月約 $12,500，5年共支出 $750,000），可將資金放入高息定存與穩健儲蓄。",
+                tip: "房屋貸款是以住宅物業作抵押的長期貸款。個人良好的信貸紀錄有助獲得較低的貸款利率與更高的信貸額。",
+                choices: [
+                    { title: "高槓桿置業按揭", action: "buy_house_leveraged", desc: "支付 $800,000 首期，申請 $3,200,000 物業按揭置業（需現金足夠），獲得物業資產但增加房屋貸款負債。" },
+                    { title: "租樓 + 定期儲蓄", action: "rent_and_invest", desc: "每年付出租金 $150,000（每月約 $12,500，5年共支出 $750,000），將餘下資金放入定期存款與儲蓄，保持資金彈性。" }
+                ]
+            },
+            {
+                stageName: "階段 5: 40-45歲",
+                title: "保守定進取？",
+                topicTag: "淨現值 (NPV) 計算要素",
+                rewardText: "⚠️ 答錯懲罰：生bb!（可自選仔/女及起名，並負擔每月 +$10,000 育兒開支！）",
+                desc: "你正在考慮為公司購買加盟項目。項目 A 算得淨現值為 +$20,000；項目 B 預期收益較高但存在虧損風險。",
+                tip: "淨現值 = - 初始成本 + 各期現金流入現值總和。當淨現值 > 0 時代表投資能創造價值，應採納該投資項目。",
+                choices: [
+                    { title: "採納淨現值 > 0 的穩健項目 A", action: "npv_safe_project", desc: "投入 $150,000 採納淨現值 = +$20,000 的加盟項目，獲取穩定現金流入。" },
+                    { title: "高增長科技項目 B", action: "npv_growth_project", desc: "投入 $150,000 於高增長項目，博取極高回報，但承受 30% 未達預期的失敗風險。" }
+                ]
+            },
+            {
+                stageName: "階段 6: 45-50歲",
+                title: "主板定GEM?",
+                topicTag: "個人信貸紀錄與查閱權利",
+                rewardText: "🦸 幫公司化解重大公關災難！再獲晉升 (加薪 +$6,000/月) + 特別紅包 $30,000！",
+                desc: "你打算將一部分資金投入股票市場。賣出價大於買入價會產生資本利潤，但股票風險遠高於銀行存款。你可以選擇主板藍籌股或創業板股票。",
+                tip: "個人信貸紀錄由信貸資料機構（如環聯）記錄，每個人均有權查閱自己的信貸報告。信貸評分較高者通常能取得較低貸款利率與更佳貸款條款。",
+                choices: [
+                    { title: "主板藍籌股 (穩健派息)", action: "invest_mainboard", desc: "買入 $100,000 主板藍籌股，收取穩定股息並獲 30% 資本增值。" },
+                    { title: "創業板高增長個股", action: "invest_gem", desc: "買入 $100,000 創業板股票，爭取 +70% 高增長，但承擔下跌 50% 的風險。" }
+                ]
+            },
+            {
+                stageName: "階段 7: 50-55歲",
+                title: "債券定股票？",
+                topicTag: "恒生指數與藍籌股性質",
+                rewardText: "🥳 公司慶祝 30 週年大慶典！老闆豪氣為全體員工強積金特別加碼 $60,000！",
+                desc: "距離退休尚有 10 年，你需要因應年齡增長重新檢視投資組合的風險。面對市場波動與通脹對購買力的侵蝕，你打算如何調整資產配置？",
+                tip: "隨着接近退休年齡，投資者一般應逐步降低高風險資產比例，並透過分散投資與低風險工具抵禦風險。",
+                choices: [
+                    { title: "防守保本策略", action: "mpf_defensive", desc: "將部分資產轉為低風險政府債券與定期存款，鎖定既有資本並規避市場波動。" },
+                    { title: "進取增長策略", action: "mpf_aggressive", desc: "維持高比例股票投資組合，博取 +35% 長期資本增值以對抗通脹。" }
+                ]
+            },
+            {
+                stageName: "階段 8: 55-60歲",
+                title: "清盤？",
+                topicTag: "公司清盤受償順序",
+                rewardText: "⚠️ 答錯懲罰：失業，被迫做清潔工，薪金降至最低工資！",
+                desc: "你持有一筆面值 $100,000 的公司債券，該發行機構面臨清盤重組。市場買家出價 $80,000 收購；你亦可選擇堅持等待法定清盤重組程序。",
+                tip: "在企業清盤清算受償次序中：債務人/債券持有人優先於優先股及普通股股東受償（優先股優先於普通股）。",
+                choices: [
+                    { title: "折讓 80% 即時套現", action: "sell_bond_discount", desc: "以 $80,000 即時出售債券套現，鎖定現金流並避開訴訟耗時。" },
+                    { title: "堅持等待法律清盤受償", action: "wait_liquidation", desc: "作為債券持有人利用優先受償權，等待清盤程序結束取回 95% 本金 ($95,000)。" }
+                ]
+            },
+            {
+                stageName: "階段 9: 60歲退休",
+                title: "搏唔搏一鋪？",
+                topicTag: "退休階段財務策略與風險防範",
+                rewardText: "🏆 考對DSE考題，獲選為全港「理財標兵」！獲發退休特別津貼 $100,000！",
+                desc: "你已年滿 60 歲，正式步入退休人生階段。此階段主動薪金收入停止，但面對日常生活費、長者醫療開支及長壽風險等財務需要。你手上有累積多年的儲蓄，打算如何處置？",
+                tip: "退休人生階段主動薪金收入停止，財務需要集中於醫療、長者照顧與日常基本開支。理財策略應以保本、維繫資金流動性及穩健現金流為核心。過度冒險（如博彩賭博）將帶來毀滅性的財務風險。",
+                choices: [
+                    { title: "安享晚年 (銀行定期存款)", action: "safe_retirement_deposit", desc: "將儲蓄存於銀行作高息定期存款，獲取穩定利息收益，保障退休人生階段的醫療與生活需要。" },
+                    { title: "孤注一擲 (到澳門賭博)", action: "macau_gambling", desc: "帶同所有儲蓄前往澳門賭場博彩，試圖一舉翻倍！（⚠️ 若銀行存款負數需先抵押資產！）" }
+                ]
+            }
+        ];
+
+        function getPersonalizedQuiz(round, career) {
+            const questions = [
+                // Stage 1
+                {
+                    question: `心心現年62歲，是一家企業的兼職顧問，月薪$40 000。在強制性公積金（MPF）制度下，心心每月個人須扣除的供款額是多少？`,
+                    options: [
+                        "A. $4,000",
+                        "B. $2,000",
+                        "C. $1,500",
+                        "D. $0"
+                    ],
+                    correct: 2, // C ($1,500)
+                    explanation: "根據香港強積金制度，供款適用於 18 至 64 歲之僱員。僱員最高供款上限之相關收入為每月 $30,000，僱員強制性供款比例為 5%。因此，即使心心月薪為 $40,000，其每月供款上限仍為 $30,000 × 5% = $1,500。"
+                },
+                // Stage 2
+                {
+                    question: `下列哪項有關私人分期貸款的陳述是正確的？`,
+                    options: [
+                        "A. 利率通常較銀行透支高。",
+                        "B. 貸款期內的利率是浮動的。",
+                        "C. 沒有固定還款期。",
+                        "D. 沒有設定每月最低還款額"
+                    ],
+                    correct: 3, // D
+                    explanation: "私人分期貸款設有固定還款期及每月固定還款額（本金加利息），因此並沒有設定「每月最低還款額」（最低還款額為信用卡的特徵）。此外，私人分期貸款通常採用固定利率，且利率一般較銀行透支及信用卡為低。"
+                },
+                // Stage 3
+                {
+                    question: `某銀行提供年利率 10% 的儲蓄存款。若計息頻率由「每年複息計算」改為「每半年複息計算」，對實際回報率有何影響？`,
+                    options: [
+                        "A. 實際回報率會下降，因為每半年的名義利率減少了",
+                        "B. 實際回報率會等於單利息的回報率",
+                        "C. 實際回報率會上升，因為複息計算的頻率增加了",
+                        "D. 實際回報率維持不變，始終等於名義回報率 10%"
+                    ],
+                    correct: 2, // C
+                    explanation: "根據相關概念，名義回報率相同時，如計算複息的頻率增加（例如由每年改為每半年），實際回報率便會上升。"
+                },
+                // Stage 4
+                {
+                    question: `下列哪些有關信用卡的陳述是正確的？`,
+                    options: [
+                        "A. 利率比銀行透支低",
+                        "B. 準時償還可豁免年費",
+                        "C. 如在到期日前繳付最低還款額，餘額不會徵收利息",
+                        "D. 不同用家有不同信用限額"
+                    ],
+                    correct: 3, // D
+                    explanation: "發行信用卡之機構（如銀行）會根據申請人的薪酬收入、財務狀況及信貸紀錄，為不同用家設定個人化之「信用限額」（Credit Limit）。其餘選項均不正確：信用卡的年利率一般較銀行透支高；準時還款豁免的是免息期內的財務費用或逾期罰款，而非自動豁免年費；若只繳付最低還款額（Minimum payment），剩餘欠款仍會被徵收高昂的利息。"
+                },
+                // Stage 5
+                {
+                    question: `你正在考慮以淨現值來決定是否購買一件辦公室設備。你不需要下列哪些資料來作決定？`,
+                    options: [
+                        "A. 設備成本",
+                        "B. 購置和使用該設備所引致的現金流",
+                        "C. 該設備在使用年限完結時的殘值",
+                        "D. 市場利率"
+                    ],
+                    correct: 3, // D
+                    explanation: "計算淨現值（NPV）需要初始資本開支（設備成本）、營運淨現金流、完結時的殘值（終端現金流入）以及企業的要求回報率/貼現率（Discount Rate）。一般的「市場利率」並不等同於企業評估特定投資項目時所需的貼現率，因此並非作決定時所必需的資料。"
+                },
+                // Stage 6
+                {
+                    question: `下列哪項有關個人信貸記錄的陳述是正確的？`,
+                    options: [
+                        "A. 信貸評分較高的借貸人會獲得較高存款利率。",
+                        "B. 任何人均有權查閱自己的信貸報告。",
+                        "C. 信貸評分較高的借貸人貸款可豁免利息。",
+                        "D. 受僱人士的信貸評分較退休人士的為高。"
+                    ],
+                    correct: 1, // B
+                    explanation: "根據個人資料私隱條例及香港信貸資料機構（如環聯 TU）之規定，任何人均有權向信貸資料機構查閱自己的個人信貸報告（選項 B 正確）。選項 A 錯誤（信貸評分影響貸款利率而非存款利率）；選項 C 錯誤（評分高者可享較低貸款利率而非免息）；選項 D 錯誤（信貸評分取決於過往還款紀錄及信貸行為，與受僱或退休身份無必然關係）。"
+                },
+                // Stage 7
+                {
+                    question: `下列哪項有關恒生指數的陳述是正確的？`,
+                    options: [
+                        "A. 過去三年成份股數目維持不變。",
+                        "B. 它是香港上市公司發行的股票整體表現的指標。",
+                        "C. 在計算指數時，所有成份股所佔的比重需相同。",
+                        "D. 「物流業」是四個分類指數的其中一個。"
+                    ],
+                    correct: 1, // B
+                    explanation: "選項 B 正確：恒生指數是反映香港股票市場整體表現的主要指標。選項 A 錯誤：成份股數目近年持續調整增加；選項 C 錯誤：計算時採用自由流通量調整後的市值加權法（並設有上限），非等比重；選項 D 錯誤：四大分類指數為金融業、公用事業、地產及工商業（物流業屬工商業旗下）。"
+                },
+                // Stage 8
+                {
+                    question: `當一間公司不幸進入法定清盤程序時，下列各權益持有人的清算受償順序，由最優先至最後次序排列何者正確？`,
+                    options: [
+                        "A. 普通股股東 → 優先股股東 → 債券持有人",
+                        "B. 優先股股東 → 普通股股東 → 債券持有人",
+                        "C. 債務人/債券持有人 → 優先股股東 → 普通股股東",
+                        "D. 債券持有人 → 普通股股東 → 優先股股東"
+                    ],
+                    correct: 2, // C
+                    explanation: "清盤受償順序為：清盤人費用及員工欠薪 → 債務人/債券持有人 → 優先股股東 → 普通股股東。"
+                },
+                // Stage 9
+                {
+                    question: `關於退休人生階段的財務需要與理財策略，下列哪項說明是正確的？`,
+                    options: [
+                        "A. 退休階段工作主動收入大增，因此應大幅增加高風險投機項目",
+                        "B. 退休階段無須預留醫療及緊急預備金，只需考慮日常餐飲費用",
+                        "C. 退休階段缺乏穩定薪金收入，理財重點應為保本、預留醫療開支及維持穩健現金流",
+                        "D. 退休後應將所有資金投入高風險創業板股票以追求最高資本增值"
+                    ],
+                    correct: 2, // C
+                    explanation: "退休人生階段主動薪金收入停止，財務需要集中於醫療開支、長者照顧及日常生活，理財策略應以安全保本、維持資金流動性及穩定現金流為核心。"
+                }
+            ];
+
+            return questions[round - 1];
+        }
+
+        function startGame(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('player-name').value;
+            const genderChoice = document.querySelector('input[name="gender"]:checked').value;
+            const careerChoice = document.querySelector('input[name="career"]:checked').value;
+
+            state.playerName = nameInput || '劉俊康';
+            state.gender = genderChoice;
+            state.careerType = careerChoice;
+            state.careerTitle = careerDisplayNames[careerChoice] || '職場新人';
+            state.currentRound = 1;
+            state.mpf = 0;
+            state.bonds = 0;
+            state.stocksMain = 0;
+            state.stocksGEM = 0;
+            state.propertyValue = 0;
+            state.carValue = 0;
+            state.creditDebt = 0;
+            state.mortgageLoan = 0;
+            state.hasInsurance = false;
+            state.stage3GuarantorTriggered = false;
+            state.extraMonthlyExpense = 0;
+            state.spouseInfo = null;
+            state.babyInfo = null;
+            state.totalQuizCount = 0;
+            state.quizCorrectCount = 0;
+            state.masteredTopics = [];
+            state.wrongQuestions = [];
+            state.retryBonusTotal = 0;
+
+            if (careerChoice === 'mcd') {
+                state.salary = 15000;
+                state.cash = 25000;
+                state.personalLoan = 0; 
+                state.creditScore = 760;
+            } else if (careerChoice === 'yt') {
+                state.salary = 20000;
+                state.cash = 100000; 
+                state.personalLoan = 20000;
+                state.creditScore = 720;
+            } else if (careerChoice === 'clerk') {
+                state.salary = 22000;
+                state.cash = 35000;
+                state.personalLoan = 30000;
+                state.creditScore = 820;
+            } else if (careerChoice === 'teacher') {
+                state.salary = 34000; 
+                state.cash = 20000;
+                state.personalLoan = 300000; 
+                state.creditScore = 800;
+            }
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-dashboard').classList.remove('hidden');
+
+            document.getElementById('player-display-name').textContent = state.playerName;
+            
+            const avatarElem = document.getElementById('player-display-avatar');
+            const genderTagElem = document.getElementById('player-display-gender');
+            
+            if (state.gender === 'female') {
+                avatarElem.textContent = '🙋‍♀️';
+                genderTagElem.textContent = '女';
+                genderTagElem.className = "text-xs px-1.5 py-0.2 rounded bg-pink-100 text-pink-700 font-bold border border-pink-200";
+            } else {
+                avatarElem.textContent = '🙋‍♂️';
+                genderTagElem.textContent = '男';
+                genderTagElem.className = "text-xs px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 font-bold border border-blue-200";
+            }
+
+            updateLedger();
+            renderTurn();
+        }
+
+        function getCreditRatingGrade(score) {
+            if (score >= 800) return { label: 'A (極優)', class: 'font-bold text-emerald-600 text-sm' };
+            if (score >= 700) return { label: 'B (良好)', class: 'font-bold text-blue-600 text-sm' };
+            if (score >= 600) return { label: 'C (一般)', class: 'font-bold text-amber-600 text-sm' };
+            if (score >= 500) return { label: 'D (欠佳)', class: 'font-bold text-orange-600 text-sm' };
+            return { label: 'F (差劣)', class: 'font-bold text-rose-600 text-sm' };
+        }
+
+        function updateLedger() {
+            const totalAssets = state.cash + state.mpf + state.bonds + state.stocksMain + state.stocksGEM + state.propertyValue + (state.carValue || 0);
+            const totalLiabilities = state.creditDebt + state.personalLoan + state.mortgageLoan;
+            const netWorth = totalAssets - totalLiabilities;
+
+            document.getElementById('player-display-career').textContent = state.careerTitle;
+            document.getElementById('display-salary').textContent = `$${state.salary.toLocaleString()}`;
+
+            const ratingElem = document.getElementById('display-credit-rating');
+            if (ratingElem) {
+                const gradeInfo = getCreditRatingGrade(state.creditScore);
+                ratingElem.textContent = gradeInfo.label;
+                ratingElem.className = gradeInfo.class;
+            }
+
+            // Update family status badge
+            const familyBadge = document.getElementById('family-status-badge');
+            const familyDetail = document.getElementById('family-status-detail');
+            let familyTextParts = [];
+            if (state.spouseInfo) {
+                familyTextParts.push(`伴侶: ${state.spouseInfo.name}`);
+            }
+            if (state.babyInfo) {
+                familyTextParts.push(`子女: ${state.babyInfo.name} (${state.babyInfo.gender === 'boy' ? 'BB仔 👦' : 'BB女 👧'})`);
+            }
+
+            if (familyTextParts.length > 0) {
+                familyBadge.classList.remove('hidden');
+                familyDetail.textContent = familyTextParts.join(' | ');
+            } else {
+                familyBadge.classList.add('hidden');
+            }
+
+            document.getElementById('stage-progress').style.width = `${(state.currentRound / 9) * 100}%`;
+            document.getElementById('turn-subhead').textContent = `階段 ${state.currentRound} / 9`;
+            document.getElementById('round-indicator').textContent = `${state.currentRound}/9`;
+
+            document.getElementById('ledger-cash').textContent = `$${Math.round(state.cash).toLocaleString()}`;
+            document.getElementById('ledger-mpf').textContent = `$${Math.round(state.mpf).toLocaleString()}`;
+            document.getElementById('ledger-bonds').textContent = `$${Math.round(state.bonds).toLocaleString()}`;
+            document.getElementById('ledger-stocks').textContent = `$${Math.round(state.stocksMain + state.stocksGEM).toLocaleString()}`;
+            document.getElementById('ledger-property').textContent = `$${Math.round(state.propertyValue).toLocaleString()}`;
+            document.getElementById('ledger-car').textContent = `$${Math.round(state.carValue || 0).toLocaleString()}`;
+
+            document.getElementById('ledger-credit-debt').textContent = `$${Math.round(state.creditDebt).toLocaleString()}`;
+            document.getElementById('ledger-loan').textContent = `$${Math.round(state.personalLoan).toLocaleString()}`;
+            document.getElementById('ledger-mortgage').textContent = `$${Math.round(state.mortgageLoan).toLocaleString()}`;
+
+            document.getElementById('ledger-networth').textContent = `$${Math.round(netWorth).toLocaleString()}`;
+        }
+
+        function renderTurn() {
+            if (state.currentRound === 3 && !state.stage3GuarantorTriggered) {
+                state.personalLoan += 50000;
+                state.stage3GuarantorTriggered = true;
+                updateLedger();
+            }
+
+            const currentDef = roundScenarioDefinitions[state.currentRound - 1];
+
+            document.getElementById('stage-badge').textContent = currentDef.stageName;
+            document.getElementById('scene-title').textContent = currentDef.title;
+            document.getElementById('scene-description').textContent = currentDef.desc;
+
+            const yearlyIncome = state.salary * 12;
+            const fiveYearIncome = yearlyIncome * 5;
+            const mpfDeduction = fiveYearIncome * 0.05; 
+            
+            const livingFactor = (state.careerType === 'mcd') ? 0.25 : 0.45;
+            const baseLivingExpenses = fiveYearIncome * livingFactor;
+            const extraLivingExpenses = (state.extraMonthlyExpense || 0) * 12 * 5;
+            const livingExpenses = baseLivingExpenses + extraLivingExpenses;
+            let debtInterest = (state.creditDebt * 0.35) + (state.personalLoan * 0.08) + (state.mortgageLoan * 0.035);
+
+            document.getElementById('cf-formula-note').textContent = `月薪 $${state.salary.toLocaleString()}/月`;
+            document.getElementById('cf-income').textContent = `+$${Math.round(fiveYearIncome).toLocaleString()}`;
+            document.getElementById('cf-income-sub').textContent = `$${state.salary.toLocaleString()}/月`;
+            document.getElementById('cf-mpf').textContent = `-$${Math.round(mpfDeduction).toLocaleString()}`;
+            document.getElementById('cf-living').textContent = `-$${Math.round(livingExpenses).toLocaleString()}`;
+            
+            const livingNoteElem = document.getElementById('cf-living-note');
+            if (livingNoteElem) {
+                let noteText = (state.careerType === 'mcd') ? '總收入 x 25%' : '總收入 x 45%';
+                if (state.extraMonthlyExpense > 0) {
+                    noteText += ` + 家用/育兒($${state.extraMonthlyExpense.toLocaleString()}/月)`;
+                }
+                livingNoteElem.textContent = noteText;
+            }
+            
+            document.getElementById('cf-debt').textContent = `-$${Math.round(debtInterest).toLocaleString()}`;
+
+            const decisionBox = document.getElementById('decision-box');
+            decisionBox.innerHTML = `
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-code-fork text-amber-600 mr-1"></i>請選擇你的理財決策：
+                </label>
+            `;
+
+            currentDef.choices.forEach((choice, index) => {
+                const choiceBtn = document.createElement('label');
+                choiceBtn.className = "flex items-start gap-3 border border-slate-200 p-4 rounded-xl cursor-pointer hover:bg-blue-50/60 hover:border-bafs-blue transition text-xs font-medium text-slate-800 bg-white shadow-sm block";
+                choiceBtn.innerHTML = `
+                    <div class="flex items-center h-5">
+                        <input type="radio" name="turnChoice" value="${choice.action}" class="w-4 h-4 text-bafs-blue focus:ring-bafs-blue" ${index === 0 ? 'checked' : ''}>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="font-bold text-sm text-slate-900">${choice.title}</div>
+                        <div class="text-xs text-slate-600 leading-relaxed">${choice.desc}</div>
+                    </div>
+                `;
+                decisionBox.appendChild(choiceBtn);
+            });
+
+            const quizData = getPersonalizedQuiz(state.currentRound, state.careerType);
+            if (quizData) {
+                const challengeBox = document.getElementById('exam-challenge-box');
+                challengeBox.classList.remove('hidden');
+                
+                let rewardDisplay = currentDef.rewardText;
+                
+                if (state.currentRound === 4) {
+                    if (state.gender === 'male') {
+                        rewardDisplay = "⚠️ 答錯懲罰：娶老婆（付出禮金及額外家用負擔！）";
+                    } else {
+                        rewardDisplay = "⚠️ 答錯懲罰：嫁人（但未婚夫失業）";
+                    }
+                } else if (state.currentRound === 5) {
+                    rewardDisplay = "⚠️ 答錯懲罰：生bb!（自選仔/女及起名，負擔每月 +$10,000 育兒開支！）";
+                } else if (state.currentRound === 8) {
+                    rewardDisplay = "⚠️ 答錯懲罰：失業，被迫做清潔工，薪金降至最低工資！";
+                } else if (state.currentRound === 2) {
+                    const promo = getPromotionName(state.careerType, 1);
+                    rewardDisplay = `🎉 答對獲職位晉升！成功升職為【${promo}】(加薪 +$4,000/月)`;
+                } else if (state.currentRound === 6) {
+                    const promo = getPromotionName(state.careerType, 2);
+                    rewardDisplay = `🦸 幫老闆化解危機！升職為【${promo}】(加薪 +$6,000/月) + 巨額紅包 $30,000`;
+                }
+
+                const quizBadge = document.getElementById('quiz-reward-badge');
+                if (rewardDisplay.startsWith('⚠️ 答錯懲罰')) {
+                    quizBadge.textContent = rewardDisplay;
+                    quizBadge.className = "text-[11px] bg-rose-100 text-rose-800 px-2.5 py-1 rounded font-bold border border-rose-300 shadow-sm";
+                } else {
+                    quizBadge.textContent = `💡 答對獎勵：${rewardDisplay}`;
+                    quizBadge.className = "text-[11px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold";
+                }
+
+                document.getElementById('quiz-career-tag').textContent = `DSE題目`;
+                document.getElementById('exam-question').textContent = quizData.question;
+
+                const optionsContainer = document.getElementById('exam-options');
+                optionsContainer.innerHTML = '';
+
+                quizData.options.forEach((optText, optIdx) => {
+                    const optLabel = document.createElement('label');
+                    optLabel.className = "flex items-center gap-2 border border-amber-200 bg-white p-2.5 rounded-lg cursor-pointer hover:bg-amber-100/50 transition";
+                    optLabel.innerHTML = `
+                        <input type="radio" name="quizChoice" value="${optIdx}" class="text-amber-600 focus:ring-amber-500" ${optIdx === 0 ? 'checked' : ''}>
+                        <span>${optText}</span>
+                    `;
+                    optionsContainer.appendChild(optLabel);
+                });
+            }
+        }
+
+        function processTurnAction() {
+            const selectedChoice = document.querySelector('input[name="turnChoice"]:checked')?.value;
+            const quizChoice = document.querySelector('input[name="quizChoice"]:checked')?.value;
+
+            if (!selectedChoice) {
+                return;
+            }
+
+            const currentDef = roundScenarioDefinitions[state.currentRound - 1];
+            let outcomesLog = [];
+
+            if (state.careerType === 'yt') {
+                const salaryChange = Math.floor((Math.random() * 14000) - 5000); 
+                state.salary = Math.max(12000, 20000 + salaryChange);
+                outcomesLog.push(`📹 Youtuber 頻道流量變化，本階段月薪調整為 $${state.salary.toLocaleString()}`);
+            }
+
+            const fiveYearIncome = state.salary * 12 * 5;
+            const mpfEmployee = fiveYearIncome * 0.05;
+            const mpfEmployer = fiveYearIncome * 0.05; 
+            
+            const livingFactor = (state.careerType === 'mcd') ? 0.25 : 0.45;
+            const baseLivingCost = fiveYearIncome * livingFactor;
+            const extraLivingCost = (state.extraMonthlyExpense || 0) * 12 * 5;
+            const livingCost = baseLivingCost + extraLivingCost;
+
+            state.cash += (fiveYearIncome - mpfEmployee - livingCost);
+            state.mpf += (mpfEmployee + mpfEmployer) * 1.15; 
+
+            if (state.creditDebt > 0) {
+                const creditInterest = state.creditDebt * 0.35;
+                state.cash -= creditInterest;
+                state.creditScore -= 30; 
+                outcomesLog.push(`⚠️ 支付信用卡高昂利息 -$${Math.round(creditInterest).toLocaleString()}，個人信貸評級扣減`);
+            }
+            if (state.personalLoan > 0) {
+                const loanInterest = state.personalLoan * 0.08;
+                state.cash -= loanInterest;
+                outcomesLog.push(`ℹ️ 支付 8% 私人貸款利息 -$${Math.round(loanInterest).toLocaleString()}`);
+            }
+            if (state.mortgageLoan > 0) {
+                const mortgageInterest = state.mortgageLoan * 0.035;
+                state.cash -= mortgageInterest;
+            }
+
+            let choiceMsg = "";
+            switch (selectedChoice) {
+                case 'buy_full_insurance':
+                    state.cash -= 25000;
+                    state.hasInsurance = true;
+                    choiceMsg = "🛡️ 選擇【全方位保障】：購買醫療保險，每年供款 $5,000（5年共支出 -$25,000），成功轉移醫療急病風險。";
+                    break;
+                case 'keep_emergency_cash':
+                    state.hasInsurance = false;
+                    state.cash -= 25000;
+                    state.bonds += 28164;
+                    choiceMsg = "📈 選擇【定期存款】：不買醫療保險，每年作定期存款 $5,000（5年共投入 $25,000），年利率 4%（5年期滿本利和 $28,164），但未轉移醫療風險。";
+                    break;
+
+                case 'refinance_debt':
+                    state.cash -= 1500;
+                    state.creditDebt = 0;
+                    state.personalLoan += 30000;
+                    state.creditScore += 40;
+                    choiceMsg = "🔄 選擇【私人分期貸款】：清還 $30,000 卡債，固定每月還款，大幅降低高息負擔並提升信貸評級！";
+                    break;
+                case 'use_savings_pay_card':
+                    state.cash -= 30000;
+                    state.creditDebt = 0;
+                    state.creditScore += 35;
+                    choiceMsg = "💳 選擇【動用儲蓄】：一次過付清 $30,000 信用卡欠款，無債一身輕！";
+                    break;
+
+                case 'pay_off_loan_early':
+                    const payAmt = Math.min(50000, state.cash);
+                    state.cash -= payAmt;
+                    state.personalLoan = Math.max(0, state.personalLoan - payAmt);
+                    state.creditScore += 30;
+                    choiceMsg = `🛡️ 選擇【清還擔保貸款】：動用 $${payAmt.toLocaleString()} 現金清還 8% 私人貸款！有效減少高息負擔並保障信貸評級！`;
+                    break;
+                case 'invest_high_yield':
+                    const investDeposit = Math.min(50000, Math.max(0, state.cash));
+                    state.cash -= investDeposit;
+                    state.bonds += investDeposit * 1.25; 
+                    choiceMsg = `📈 選擇【投入高息定存】：將 $${investDeposit.toLocaleString()} 投入 5% 高息定存，但同時需繼續承擔 8% 擔保私人貸款的高昂利息。`;
+                    break;
+
+                case 'buy_house_leveraged':
+                    const downpayment = 800000;
+                    if (state.cash >= downpayment) {
+                        state.cash -= downpayment;
+                        state.propertyValue += 4000000;
+                        state.mortgageLoan += 3200000;
+                        choiceMsg = "🏠 選擇【高槓桿置業】：支付 $800,000 首期，成功申請按揭置業！";
+                    } else {
+                        state.cash -= 750000;
+                        state.stocksMain += Math.max(0, state.cash * 0.4);
+                        state.cash *= 0.6;
+                        choiceMsg = "⚠️ 現金不足支付 $800,000 首期，自動轉為租樓（每年付出租金 $150,000，5年共支出 $750,000）並配置儲蓄";
+                    }
+                    break;
+                case 'rent_and_invest':
+                    state.cash -= 750000; 
+                    const investAmt = Math.min(600000, Math.max(0, state.cash * 0.5));
+                    state.cash -= investAmt;
+                    state.bonds += investAmt * 1.2;
+                    choiceMsg = "🏙️ 選擇【租樓 + 定期儲蓄】：每年付租金 $150,000（5年共 -$750,000），將餘下資金放入定期存款與穩健投資。";
+                    break;
+
+                case 'npv_safe_project':
+                    state.cash -= 150000;
+                    state.cash += 170000;
+                    choiceMsg = "🏢 選擇【淨現值 > 0 穩健項目 A】：成功獲取穩定現金流收益！淨資產增加 +$20,000！";
+                    break;
+                case 'npv_growth_project':
+                    state.cash -= 150000;
+                    if (Math.random() < 0.7) {
+                        state.cash += 255000;
+                        choiceMsg = "🚀 選擇【高增長科技項目 B】：項目大獲成功！獲取 70% 高額回報 +$105,000！";
+                    } else {
+                        state.cash += 50000;
+                        choiceMsg = "📉 選擇【高增長科技項目 B】：市場競爭加劇導致未達預期，虧損 -$100,000！";
+                    }
+                    break;
+
+                case 'invest_mainboard':
+                    const mainAmt = Math.min(100000, Math.max(0, state.cash));
+                    state.cash -= mainAmt;
+                    state.stocksMain += mainAmt * 1.3;
+                    choiceMsg = `📈 選擇【主板藍籌股】：投入 $${mainAmt.toLocaleString()} 買入藍籌股，收取穩定股息並獲得 30% 資本增值！`;
+                    break;
+                case 'invest_gem':
+                    const gemAmt = Math.min(100000, Math.max(0, state.cash));
+                    state.cash -= gemAmt;
+                    if (Math.random() < 0.5) {
+                        state.stocksGEM += gemAmt * 1.7;
+                        choiceMsg = `🚀 選擇【創業板個股】：股價爆發性上升！資產翻倍增加 +70%！`;
+                    } else {
+                        state.stocksGEM += gemAmt * 0.5;
+                        choiceMsg = `📉 選擇【創業板個股】：創業板股價大幅波動下滑 50%！`;
+                    }
+                    break;
+
+                case 'mpf_defensive':
+                    const realloc = state.stocksMain * 0.4;
+                    state.stocksMain -= realloc;
+                    state.bonds += realloc * 1.15;
+                    choiceMsg = "🛡️ 選擇【防守保本策略】：將高風險股票轉為穩健政府債券，鎖定退休前既有資本。";
+                    break;
+                case 'mpf_aggressive':
+                    state.stocksMain *= 1.35;
+                    choiceMsg = "🚀 選擇【進取增長策略】：維持高比例股票投資，獲取 +35% 長期資本增值以抵抗通脹！";
+                    break;
+
+                case 'sell_bond_discount':
+                    state.cash += 80000;
+                    choiceMsg = "💵 選擇【折讓套現】：以 $80,000 折讓價即時出售債券套現，避開法律程序。";
+                    break;
+                case 'wait_liquidation':
+                    state.cash += 95000;
+                    choiceMsg = "⚖️ 選擇【等待法律清盤受償】：作為債券持有人享受優先受償權，成功取回 95% 本金 ($95,000)！";
+                    break;
+
+                case 'safe_retirement_deposit':
+                    const depAmt = Math.max(0, state.cash);
+                    state.cash = depAmt * 1.2;
+                    choiceMsg = "🏦 選擇【安享晚年定存】：將資金全數投入高息定期存款，獲取穩定回報，保障退休生活！";
+                    break;
+
+                case 'macau_gambling':
+                    if (state.cash < 0) {
+                        openMortgageModal();
+                        return;
+                    } else {
+                        openCasinoModal();
+                        return;
+                    }
+                    break;
+            }
+
+            outcomesLog.unshift(choiceMsg);
+
+            const quizData = getPersonalizedQuiz(state.currentRound, state.careerType);
+            let isCorrect = false;
+
+            if (quizData && quizChoice !== undefined) {
+                state.totalQuizCount++;
+                isCorrect = (parseInt(quizChoice) === quizData.correct);
+                pendingQuizIsCorrect = isCorrect;
+                pendingQuizData = quizData;
+
+                if (isCorrect) {
+                    state.quizCorrectCount++;
+                    state.masteredTopics.push(currentDef.topicTag);
+
+                    if (state.currentRound === 1) {
+                        state.cash += 17000;
+                        outcomesLog.push("🎉 DSE 考題答對！六合彩爆冷中三獎，獲得橫財 +$17,000 現金！");
+                    } else if (state.currentRound === 2) {
+                        state.salary += 4000;
+                        const promo = getPromotionName(state.careerType, 1);
+                        state.careerTitle = promo;
+                        outcomesLog.push(`🎉 DSE 考題答對！獲公司晉升為【${promo}】！月薪加碼 +$4,000/月！`);
+                    } else if (state.currentRound === 3) {
+                        state.carValue = (state.carValue || 0) + 35000;
+                        outcomesLog.push("🚗 DSE 考題答對！獲贈一架實用二手車（+$35,000 資產）！");
+                    } else if (state.currentRound === 6) {
+                        state.salary += 6000;
+                        state.cash += 30000;
+                        const promo = getPromotionName(state.careerType, 2);
+                        state.careerTitle = promo;
+                        outcomesLog.push(`🦸 DSE 考題答對！成功幫公司化解危機，晉升為【${promo}】（加薪 +$6,000/月）並獲獎金 +$30,000！`);
+                    } else if (state.currentRound === 7) {
+                        state.mpf += 60000;
+                        outcomesLog.push("🥳 DSE 考題答對！公司慶祝 30 週年，老闆為強積金特別加碼 +$60,000！");
+                    } else if (state.currentRound === 9) {
+                        state.cash += 100000;
+                        outcomesLog.push("🏆 DSE 考題答對！獲選全港理財標兵，獲發退休特別津貼 +$100,000！");
+                    } else {
+                        state.cash += 5000;
+                        outcomesLog.push("💡 DSE 考題答對！獲得獎學金 +$5,000 現金！");
+                    }
+                } else {
+                    state.wrongQuestions.push({
+                        stageNum: state.currentRound,
+                        stageName: currentDef.stageName,
+                        questionData: quizData
+                    });
+
+                    if (state.currentRound === 8) {
+                        state.salary = 11500;
+                        state.careerTitle = '清潔工人';
+                        outcomesLog.push("⚠️ DSE 考題答錯！不幸失業被迫轉職為清潔工，薪金降至最低工資 $11,500/月！");
+                    }
+                }
+            }
+
+            pendingOutcomesLog = outcomesLog;
+            updateLedger();
+
+            // Check Special Interactive Modals after turn action
+            if (state.currentRound === 4 && !isCorrect) {
+                openMarriageModal();
+                return;
+            }
+
+            if (state.currentRound === 5 && !isCorrect) {
+                openBabyModal();
+                return;
+            }
+
+            if (state.currentRound === 7) {
+                openHeartDiseaseModal();
+                return;
+            }
+
+            showFeedbackModal();
+        }
+
+        function openMarriageModal() {
+            const modal = document.getElementById('marriage-modal');
+            const grid = document.getElementById('marriage-options-grid');
+            const titleElem = document.getElementById('marriage-modal-title');
+            const subTitleElem = document.getElementById('marriage-modal-subtitle');
+            grid.innerHTML = '';
+
+            const isMale = (state.gender === 'male');
+            const options = isMale ? wifeOptions : husbandOptions;
+
+            if (isMale) {
+                titleElem.textContent = "請選擇娶老婆對象 (娶老婆)";
+                subTitleElem.textContent = "由於答錯理財題目，你被逼踏入婚姻殿堂！請選擇你要娶的老婆對象：";
+            } else {
+                titleElem.textContent = "請選擇嫁人對象 (嫁人（但未婚夫失業）)";
+                subTitleElem.textContent = "由於答錯理財題目，你被逼踏入婚姻殿堂！請選擇你要嫁的人（未婚夫失業）：";
+            }
+
+            options.forEach((opt, idx) => {
+                const card = document.createElement('label');
+                card.className = "cursor-pointer block h-full";
+                
+                const imgHtml = opt.imgUrl ? 
+                    `<img src="${opt.imgUrl}" alt="${opt.name}" class="w-16 h-16 rounded-full object-cover border-2 border-rose-300 shadow-sm flex-shrink-0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/fecdd3/881337?text=${encodeURIComponent(opt.name)}'">` :
+                    `<div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 font-bold flex items-center justify-center text-2xl border-2 border-rose-300 flex-shrink-0">💍</div>`;
+
+                card.innerHTML = `
+                    <input type="radio" name="spouseChoice" value="${opt.id}" class="sr-only spouse-card-input" ${idx === 0 ? 'checked' : ''}>
+                    <div class="spouse-card-content border border-slate-200 p-3.5 rounded-xl hover:border-rose-400 transition bg-white h-full flex flex-col justify-between">
+                        <div class="flex items-center gap-3 mb-2">
+                            ${imgHtml}
+                            <div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-200 inline-block mb-1">${opt.tag}</span>
+                                <h4 class="font-black text-slate-900 text-sm">${opt.name}</h4>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-snug mb-2">${opt.desc}</p>
+                        <div class="pt-2 border-t border-slate-100 text-[11px] font-semibold text-rose-700 flex justify-between">
+                            <span>禮金/開支: $${opt.dowry.toLocaleString()}</span>
+                            <span>每月家用: +$${opt.monthlyExpense.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function confirmMarriageChoice() {
+            const selectedSpouseId = document.querySelector('input[name="spouseChoice"]:checked')?.value;
+            const isMale = (state.gender === 'male');
+            const optionsList = isMale ? wifeOptions : husbandOptions;
+            const spouse = optionsList.find(s => s.id === selectedSpouseId) || optionsList[0];
+
+            state.spouseInfo = spouse;
+            state.cash -= spouse.dowry;
+            state.extraMonthlyExpense += spouse.monthlyExpense;
+
+            const actionLabel = isMale ? "娶老婆" : "嫁人（但未婚夫失業）";
+            pendingOutcomesLog.push(`⚠️ 答錯懲罰【${actionLabel}】：與 ${spouse.name} 結婚！支付禮金 -$${spouse.dowry.toLocaleString()}，每月額外家用 +$${spouse.monthlyExpense.toLocaleString()}/月！`);
+
+            updateLedger();
+            document.getElementById('marriage-modal').classList.add('hidden');
+            showFeedbackModal();
+        }
+
+        function openBabyModal() {
+            const modal = document.getElementById('baby-modal');
+            document.getElementById('baby-name-input').value = '';
+            modal.classList.remove('hidden');
+        }
+
+        function confirmBabyChoice() {
+            const gender = document.querySelector('input[name="babyGender"]:checked')?.value || 'boy';
+            let name = document.getElementById('baby-name-input').value.trim();
+            if (!name) {
+                name = (gender === 'boy') ? '劉小明' : '劉欣欣';
+            }
+
+            state.babyInfo = { gender, name };
+            state.extraMonthlyExpense += 10000;
+
+            pendingOutcomesLog.push(`👶 答錯懲罰【喜得貴子】：迎接 ${name} (${gender === 'boy' ? 'BB仔 👦' : 'BB女 👧'})！每月育兒開支增加 +$10,000/月（5年共支出 -$600,000）！`);
+
+            updateLedger();
+            document.getElementById('baby-modal').classList.add('hidden');
+            showFeedbackModal();
+        }
+
+        function openHeartDiseaseModal() {
+            const modal = document.getElementById('heart-disease-modal');
+            const contentBox = document.getElementById('heart-disease-content');
+
+            if (state.hasInsurance) {
+                contentBox.innerHTML = `
+                    <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl text-xs space-y-1.5 text-emerald-900">
+                        <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-check text-emerald-600 text-base"></i>
+                            <span>早年購買之全方位醫療保險生效！</span>
+                        </div>
+                        <p class="leading-relaxed">
+                            幸好你在階段 1 購買了醫療保險，保險公司承擔 <strong>90% ($900,000)</strong> 醫療手術費用！
+                        </p>
+                        <div class="pt-1.5 border-t border-emerald-200 font-bold flex justify-between">
+                            <span>個人自付額 (10%):</span>
+                            <span class="text-emerald-700">-$100,000</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                contentBox.innerHTML = `
+                    <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-xs space-y-1.5 text-rose-900">
+                        <div class="font-bold text-rose-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                            <span>未購買醫療保險，需全額自費！</span>
+                        </div>
+                        <p class="leading-relaxed">
+                            由於你早年未有購買醫療保險轉移風險，必須全數以個人儲蓄及資產支付高昂手術費！
+                        </p>
+                        <div class="pt-1.5 border-t border-rose-200 font-bold flex justify-between">
+                            <span>個人全額支付手術費:</span>
+                            <span class="text-rose-700">-$1,000,000</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function confirmHeartDiseasePayment() {
+            if (state.hasInsurance) {
+                state.cash -= 100000;
+                pendingOutcomesLog.push("🏥 突發急性心臟病：醫保報銷 90% 費用，個人自付部分 -$100,000 手術費。");
+            } else {
+                state.cash -= 1000000;
+                pendingOutcomesLog.push("🚨 突發急性心臟病：無醫保保障，全額自費 -$1,000,000 手術費！");
+            }
+
+            updateLedger();
+            document.getElementById('heart-disease-modal').classList.add('hidden');
+            showFeedbackModal();
+        }
+
+        function showFeedbackModal() {
+            const modal = document.getElementById('feedback-modal');
+            const currentDef = roundScenarioDefinitions[state.currentRound - 1];
+
+            document.getElementById('fb-stage-tag').textContent = currentDef.stageName;
+
+            const quizCard = document.getElementById('fb-quiz-card');
+            const quizStatus = document.getElementById('fb-quiz-status');
+            const quizExp = document.getElementById('fb-quiz-explanation');
+
+            if (pendingQuizIsCorrect) {
+                quizCard.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50/70";
+                quizStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i><span class="text-emerald-900">DSE 題目回答正確！</span>`;
+            } else {
+                quizCard.className = "p-4 rounded-xl border border-rose-200 bg-rose-50/70";
+                quizStatus.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600"></i><span class="text-rose-900">DSE 題目回答錯誤！</span>`;
+            }
+
+            quizExp.textContent = pendingQuizData ? pendingQuizData.explanation : "無解析";
+
+            const listElem = document.getElementById('fb-outcomes-list');
+            listElem.innerHTML = '';
+            pendingOutcomesLog.forEach(msg => {
+                const li = document.createElement('li');
+                li.className = "flex items-start gap-1.5 leading-relaxed";
+                li.innerHTML = `<span class="text-amber-500 font-bold">•</span><span>${msg}</span>`;
+                listElem.appendChild(li);
+            });
+
+            const btnText = document.getElementById('fb-btn-text');
+            if (state.currentRound >= 9) {
+                btnText.textContent = "完成人生，查看理財戰略總報告";
+            } else {
+                btnText.textContent = `進入階段 ${state.currentRound + 1}`;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function confirmNextStage() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+
+            if (state.currentRound >= 9) {
+                if (state.wrongQuestions.length > 0) {
+                    openWrongQuestionsModal();
+                } else {
+                    showFinalReport();
+                }
+            } else {
+                state.currentRound++;
+                updateLedger();
+                renderTurn();
+            }
+        }
+
+        function openWrongQuestionsModal() {
+            retryIndex = 0;
+            const modal = document.getElementById('wrong-questions-modal');
+            modal.classList.remove('hidden');
+            renderRetryQuestion();
+        }
+
+        function renderRetryQuestion() {
+            const total = state.wrongQuestions.length;
+            if (retryIndex >= total) {
+                document.getElementById('wrong-questions-modal').classList.add('hidden');
+                showFinalReport();
+                return;
+            }
+
+            document.getElementById('retry-curr-num').textContent = retryIndex + 1;
+            document.getElementById('retry-total-num').textContent = total;
+
+            const item = state.wrongQuestions[retryIndex];
+            document.getElementById('retry-question-stage').textContent = `${item.stageName} 錯題`;
+            document.getElementById('retry-question-text').textContent = item.questionData.question;
+
+            const container = document.getElementById('retry-options-container');
+            container.innerHTML = '';
+
+            item.questionData.options.forEach((optText, optIdx) => {
+                const label = document.createElement('label');
+                label.className = "flex items-center gap-2 border border-slate-200 bg-white p-2.5 rounded-lg cursor-pointer hover:bg-indigo-50 transition";
+                label.innerHTML = `
+                    <input type="radio" name="retryChoice" value="${optIdx}" class="text-indigo-600 focus:ring-indigo-500" ${optIdx === 0 ? 'checked' : ''}>
+                    <span>${optText}</span>
+                `;
+                container.appendChild(label);
+            });
+
+            document.getElementById('retry-feedback-box').classList.add('hidden');
+            document.getElementById('retry-submit-btn').classList.remove('hidden');
+            document.getElementById('retry-next-btn').classList.add('hidden');
+        }
+
+        function submitRetryAnswer() {
+            const selectedOpt = document.querySelector('input[name="retryChoice"]:checked')?.value;
+            if (selectedOpt === undefined) return;
+
+            const item = state.wrongQuestions[retryIndex];
+            const isCorrect = (parseInt(selectedOpt) === item.questionData.correct);
+
+            const fbBox = document.getElementById('retry-feedback-box');
+            const fbTitle = document.getElementById('retry-feedback-title');
+            const fbDesc = document.getElementById('retry-feedback-desc');
+
+            fbBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                fbBox.className = "p-3 rounded-xl border border-emerald-300 bg-emerald-50 text-xs text-emerald-900";
+                fbTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>恭喜答對！成功溫故知新！`;
+                fbDesc.textContent = `獲發重溫補考獎學金 +$20,000！`;
+                state.cash += 20000;
+                state.retryBonusTotal += 20000;
+                state.quizCorrectCount++;
+                updateLedger();
+            } else {
+                fbBox.className = "p-3 rounded-xl border border-rose-300 bg-rose-50 text-xs text-rose-900";
+                fbTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i>再次答錯！解析如下：`;
+                fbDesc.textContent = item.questionData.explanation;
+            }
+
+            document.getElementById('retry-submit-btn').classList.add('hidden');
+            document.getElementById('retry-next-btn').classList.remove('hidden');
+        }
+
+        function nextRetryQuestion() {
+            retryIndex++;
+            renderRetryQuestion();
+        }
+
+        function openMortgageModal() {
+            const modal = document.getElementById('mortgage-modal');
+            const deficit = Math.abs(state.cash);
+            const nonCashAssets = state.mpf + state.bonds + state.stocksMain + state.stocksGEM + state.propertyValue + (state.carValue || 0);
+            const netVal = nonCashAssets - deficit;
+
+            document.getElementById('mortgage-deficit-val').textContent = `-$${deficit.toLocaleString()}`;
+            document.getElementById('mortgage-assets-val').textContent = `+$${nonCashAssets.toLocaleString()}`;
+            document.getElementById('mortgage-remaining-val').textContent = `$${Math.max(0, netVal).toLocaleString()}`;
+
+            modal.classList.remove('hidden');
+        }
+
+        function retreatToSafeDeposit() {
+            document.getElementById('mortgage-modal').classList.add('hidden');
+            const depAmt = Math.max(0, state.cash);
+            state.cash = depAmt * 1.2;
+            pendingOutcomesLog.push("🏦 選擇【懸崖勒馬，安享晚年】：遠離澳門賭博，改作定期存款！");
+            updateLedger();
+            showFeedbackModal();
+        }
+
+        function confirmMortgageAndEnterCasino() {
+            document.getElementById('mortgage-modal').classList.add('hidden');
+
+            const deficit = Math.abs(state.cash);
+            const nonCashAssets = state.mpf + state.bonds + state.stocksMain + state.stocksGEM + state.propertyValue + (state.carValue || 0);
+
+            state.mpf = 0;
+            state.bonds = 0;
+            state.stocksMain = 0;
+            state.stocksGEM = 0;
+            state.propertyValue = 0;
+            state.carValue = 0;
+
+            state.cash = Math.max(0, nonCashAssets - deficit);
+
+            pendingOutcomesLog.push("⚠️ 強制抵押資產變現以清還赤字，剩餘資產轉換為賭場籌碼。");
+            updateLedger();
+
+            openCasinoModal();
+        }
+
+        function openCasinoModal() {
+            const modal = document.getElementById('casino-modal');
+            casinoLocked = false;
+            casinoAttemptCount = 0;
+
+            document.getElementById('casino-cash-display').textContent = `$${Math.round(state.cash).toLocaleString()}`;
+            document.getElementById('player-hand-icon').textContent = '❓';
+            document.getElementById('dealer-hand-icon').textContent = '❓';
+            document.getElementById('casino-status-text').textContent = '請選擇你的出招（勝出可令總儲蓄翻倍，平手重來）：';
+
+            document.getElementById('casino-owner-warning').classList.add('hidden');
+            document.getElementById('casino-quit-btn').classList.remove('hidden');
+            document.getElementById('casino-finish-btn').classList.add('hidden');
+            document.getElementById('rps-buttons').classList.remove('hidden');
+
+            modal.classList.remove('hidden');
+        }
+
+        function playRPS(playerMove) {
+            const moves = ['rock', 'scissors', 'paper'];
+            const icons = { rock: '✊', scissors: '✌️', paper: '✋' };
+            
+            // House edge logic
+            let dealerMove = moves[Math.floor(Math.random() * 3)];
+            if (Math.random() < 0.65) {
+                if (playerMove === 'rock') dealerMove = 'paper';
+                if (playerMove === 'scissors') dealerMove = 'rock';
+                if (playerMove === 'paper') dealerMove = 'scissors';
+            }
+
+            document.getElementById('player-hand-icon').textContent = icons[playerMove];
+            document.getElementById('dealer-hand-icon').textContent = icons[dealerMove];
+
+            const statusText = document.getElementById('casino-status-text');
+
+            if (playerMove === dealerMove) {
+                statusText.textContent = "🤝 平手！再來一局！";
+            } else if (
+                (playerMove === 'rock' && dealerMove === 'scissors') ||
+                (playerMove === 'scissors' && dealerMove === 'paper') ||
+                (playerMove === 'paper' && dealerMove === 'rock')
+            ) {
+                state.cash *= 2;
+                document.getElementById('casino-cash-display').textContent = `$${Math.round(state.cash).toLocaleString()}`;
+                statusText.textContent = "🎉 贏了！總儲蓄神奇翻倍！";
+            } else {
+                state.cash = 0;
+                casinoLocked = true;
+                document.getElementById('casino-cash-display').textContent = `$0`;
+                statusText.textContent = "💥 慘敗！莊家贏走你的全部儲蓄，一貧如洗！";
+
+                document.getElementById('rps-buttons').classList.add('hidden');
+                document.getElementById('casino-quit-btn').classList.add('hidden');
+                document.getElementById('casino-finish-btn').classList.remove('hidden');
+            }
+            updateLedger();
+        }
+
+        function attemptQuitCasino() {
+            casinoAttemptCount++;
+            if (state.cash > 0 && casinoAttemptCount === 1) {
+                document.getElementById('casino-owner-warning').classList.remove('hidden');
+                document.getElementById('casino-warning-text').textContent = "「入得嚟澳門賭場，贏咗錢就想走？冇咁易！今日唔玩到輸光，休想踏出賭場半步！」";
+            } else {
+                closeCasinoModalAndContinue();
+            }
+        }
+
+        function closeCasinoModalAndContinue() {
+            document.getElementById('casino-modal').classList.add('hidden');
+            if (state.cash === 0) {
+                pendingOutcomesLog.push("🎰 澳門賭博慘敗：輸光全部儲蓄，慘痛破產！");
+            } else {
+                pendingOutcomesLog.push(`🎰 澳門賭博勝利：順利帶走翻倍儲蓄 $${Math.round(state.cash).toLocaleString()}！`);
+            }
+            showFeedbackModal();
+        }
+
+        function showFinalReport() {
+            document.getElementById('game-dashboard').classList.add('hidden');
+            document.getElementById('report-screen').classList.remove('hidden');
+
+            const totalAssets = state.cash + state.mpf + state.bonds + state.stocksMain + state.stocksGEM + state.propertyValue + (state.carValue || 0);
+            const totalLiabilities = state.creditDebt + state.personalLoan + state.mortgageLoan;
+            const finalNetWorth = totalAssets - totalLiabilities;
+
+            document.getElementById('report-networth').textContent = `$${Math.round(finalNetWorth).toLocaleString()}`;
+            document.getElementById('report-mastered-count').textContent = `${state.quizCorrectCount} / 9`;
+            document.getElementById('report-retry-bonus-tag').textContent = `重溫補考總加分：+$${state.retryBonusTotal.toLocaleString()}`;
+
+            const creditInfo = getCreditRatingGrade(state.creditScore);
+            const creditElem = document.getElementById('report-credit-rating');
+            creditElem.textContent = creditInfo.label;
+            creditElem.className = creditInfo.class;
+
+            let evalText = "";
+            if (finalNetWorth > 5000000) {
+                evalText = "🥇 卓越理財大師！你展現了極高的個人理財素養，成功善用複利息、轉移急病風險、提早清還高息債務並作出精準投資，創造出過五百萬豐厚淨資產，安享尊貴退休人生！";
+            } else if (finalNetWorth > 2000000) {
+                evalText = "🥈 穩健理財高手！你具備良好的理財防禦與風險管理意識，能夠平衡投資與債務管理，累積了可觀的退休資產，退休生活充裕無憂！";
+            } else if (finalNetWorth > 0) {
+                evalText = "🥉 平穩理財學員！雖然在部分階段面臨高利息負擔或投資波動，但仍成功保持淨資產正數，達成 basic 退休財務安全目標！";
+            } else {
+                evalText = "⚠️ 財務危機警告！你的最終淨資產為負數，面臨極大破產壓力。建議深入重溫 DSE BAFS 理財單元，學習高息卡債風險、擔保人法律責任及切勿參與博彩投機！";
+            }
+
+            document.getElementById('report-eval-text').textContent = evalText;
+
+            saveRecordToLeaderboard(finalNetWorth);
+            renderAssetChart();
+
+            try {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            } catch (e) {}
+        }
+
+        function renderAssetChart() {
+            const ctx = document.getElementById('asset-chart').getContext('2d');
+            if (assetChartInstance) {
+                assetChartInstance.destroy();
+            }
+
+            assetChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['現金儲蓄', '強積金', '債券/定存', '股票', '物業估值'],
+                    datasets: [{
+                        data: [
+                            Math.max(0, state.cash),
+                            Math.max(0, state.mpf),
+                            Math.max(0, state.bonds),
+                            Math.max(0, state.stocksMain + state.stocksGEM),
+                            Math.max(0, state.propertyValue)
+                        ],
+                        backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function getLeaderboardData() {
+            try {
+                return JSON.parse(localStorage.getItem('bafs_monopoly_records') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveRecordToLeaderboard(netWorth) {
+            const records = getLeaderboardData();
+            const yearStr = new Date().getFullYear().toString();
+            
+            const newRecord = {
+                id: Date.now(),
+                name: state.playerName,
+                year: yearStr,
+                career: state.careerTitle,
+                netWorth: Math.round(netWorth),
+                quizMastered: state.quizCorrectCount
+            };
+
+            records.push(newRecord);
+            records.sort((a, b) => b.netWorth - a.netWorth);
+            localStorage.setItem('bafs_monopoly_records', JSON.stringify(records));
+
+            const rank = records.findIndex(r => r.id === newRecord.id) + 1;
+            document.getElementById('report-rank-badge').textContent = `全校排名第 ${rank} 名 / 共 ${records.length} 人`;
+        }
+
+        function openLeaderboardModal() {
+            renderLeaderboard();
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
+        }
+
+        function renderLeaderboard() {
+            const records = getLeaderboardData();
+            const tbody = document.getElementById('leaderboard-tbody');
+            tbody.innerHTML = '';
+
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">暫無排行榜紀錄</td></tr>`;
+                return;
+            }
+
+            records.forEach((r, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = (idx % 2 === 0) ? 'bg-white' : 'bg-slate-50/60';
+                
+                let rankBadge = `${idx + 1}`;
+                if (idx === 0) rankBadge = `🥇 1`;
+                if (idx === 1) rankBadge = `🥈 2`;
+                if (idx === 2) rankBadge = `🥉 3`;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-center font-black ${idx < 3 ? 'text-amber-600' : 'text-slate-600'}">${rankBadge}</td>
+                    <td class="py-2.5 px-3 font-bold text-slate-900">${r.name}</td>
+                    <td class="py-2.5 px-3 text-slate-500">${r.year}</td>
+                    <td class="py-2.5 px-3 text-slate-600">${r.career}</td>
+                    <td class="py-2.5 px-3 text-right font-black text-bafs-blue">$${r.netWorth.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-center font-bold text-emerald-600">${r.quizMastered} / 9</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="deleteRecord(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold text-[11px]">刪除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteRecord(recordId) {
+            const pwd = prompt("請輸入管理員密碼以刪除記錄：");
+            if (pwd === ADMIN_PASSWORD) {
+                let records = getLeaderboardData();
+                records = records.filter(r => r.id !== recordId);
+                localStorage.setItem('bafs_monopoly_records', JSON.stringify(records));
+                renderLeaderboard();
+            } else if (pwd !== null) {
+                alert("密碼不正確！");
+            }
+        }
+
+        function clearLeaderboardData() {
+            const pwd = prompt("請輸入管理員密碼以重置全校排行榜：");
+            if (pwd === ADMIN_PASSWORD) {
+                localStorage.removeItem('bafs_monopoly_records');
+                renderLeaderboard();
+            } else if (pwd !== null) {
+                alert("密碼不正確！");
+            }
+        }
+
+        window.onload = function() {
+            // Application ready
+        }
+    </script>
+</body>
+</html>
